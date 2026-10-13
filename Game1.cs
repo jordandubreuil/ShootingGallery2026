@@ -17,8 +17,11 @@ namespace ShootingGallery
         SpriteFont gameFont;
         SpriteFont titleFont;
 
+        Target target;
+
         Vector2 crossHairPosition;
         Vector2 targetPosition = new Vector2(350, 200);
+        Vector2 targetDestination = new Vector2(350, 200);
 
         MouseState mState;
         MouseState oldMState;
@@ -61,11 +64,14 @@ namespace ShootingGallery
 
             backgroundSprite = Content.Load<Texture2D>("sky");
             crosshairSprite = Content.Load<Texture2D>("crosshairs");
-            targetSprite = Content.Load<Texture2D>("target");
+            
             buttonSprite = Content.Load<Texture2D>("button");
 
             gameFont = Content.Load<SpriteFont>("GameFont");
             titleFont = Content.Load<SpriteFont>("TitleFont");
+            
+            targetSprite = Content.Load<Texture2D>("target");
+            target = new Target(targetSprite, new Vector2(350,200), targetRadius);
         }
 
         protected override void Update(GameTime gameTime)
@@ -89,6 +95,22 @@ namespace ShootingGallery
                 }
             }
 
+            target.Update(gameTime);
+            //Add Target Scaling feature here
+            if (target.Scale < 1.0f)
+            {
+                //targetScale += TARGET_GROWTH_RATE * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                //if(targetScale > 1.0f) targetScale = 1.0f;
+
+                Vector2 center = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+
+                target.Position = Vector2.Lerp(center, targetDestination, target.Scale);
+
+
+            }
+
+            
+
             mState = Mouse.GetState();
 
             if (mState.Position != oldMState.Position)
@@ -107,13 +129,23 @@ namespace ShootingGallery
 
             if (actionPressed && actionReleased && !gameOver)
             {
-                var hitDistance = Vector2.Distance(new Vector2(targetPosition.X + targetRadius, targetPosition.Y + targetRadius), crossHairPosition);
+                //var hitDistance = Vector2.Distance(targetPosition, crossHairPosition);
 
-                if (hitDistance < targetRadius)
+                //if (hitDistance < targetRadius)
+                //{
+                //    Random rand = new Random();
+                //    targetDestination = new Vector2((rand.Next(0, _graphics.PreferredBackBufferWidth - targetRadius * 2)), rand.Next(0, _graphics.PreferredBackBufferHeight - targetRadius * 2));
+                //    score++;
+                //    targetScale = 0f;
+                //}
+
+                if (target.IsHit(crossHairPosition))
                 {
                     Random rand = new Random();
-                    targetPosition = new Vector2((rand.Next(0, _graphics.PreferredBackBufferWidth)), rand.Next(0, _graphics.PreferredBackBufferHeight));
+                    target.Position = new Vector2((rand.Next(target.Radius, _graphics.PreferredBackBufferWidth - target.Radius)), rand.Next(target.Radius, _graphics.PreferredBackBufferHeight - target.Radius));
                     score++;
+                    targetDestination = target.Position;
+                    target.Scale = 0f;
                 }
                 mReleased = false;
             }
@@ -127,7 +159,7 @@ namespace ShootingGallery
                     gameOver = false;
                     score = 0;
                     timer = 10;
-
+                    targetScale = 0f;
                     currentGameState = GameState.Game;
                 }
             }
@@ -157,8 +189,10 @@ namespace ShootingGallery
                 case GameState.Game:
                     if(timer > 0)
                     {
-                        
-                        _spriteBatch.Draw(targetSprite, targetPosition, null, Color.White);
+                        //Vector2 origin = new Vector2(targetSprite.Width / 2, targetSprite.Height / 2); 
+                        //_spriteBatch.Draw(targetSprite, targetPosition, null, Color.White, 0f, origin, targetScale, SpriteEffects.None, 0f);
+
+                        target.Draw(_spriteBatch);
                     }
                     break;
             }
