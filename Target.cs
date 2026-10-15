@@ -9,6 +9,8 @@ namespace ShootingGallery
     {
         public Texture2D Texture { get; }
         public Vector2 Position { get; set; }
+        public Vector2 Destination { get; set; }
+        public Vector2 Center { get; set; }
         public int Radius { get; }
         public float Scale { get; set; }
         float GrowthRate = 4.0f;
@@ -18,6 +20,8 @@ namespace ShootingGallery
         {
             Texture = texture;
             Position = position;
+            Destination = position;
+            Center = position;
             Radius = radius;
         }
 
@@ -36,9 +40,12 @@ namespace ShootingGallery
             {
                 Scale += GrowthRate * (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (Scale > 1.0f) Scale = 1.0f;
+
+                Position = Vector2.Lerp(Center, Destination, Scale);
             }
         }
 
+        
         public void Draw(SpriteBatch spriteBatch)
         {
             Vector2 origin = new Vector2(Radius, Radius);

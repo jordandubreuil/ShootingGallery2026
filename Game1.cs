@@ -20,7 +20,7 @@ namespace ShootingGallery
         Target target;
 
         Vector2 crossHairPosition;
-        Vector2 targetPosition = new Vector2(350, 200);
+       
         Vector2 targetDestination = new Vector2(350, 200);
 
         MouseState mState;
@@ -28,8 +28,7 @@ namespace ShootingGallery
         bool mReleased = true;
 
         const int targetRadius = 45;
-        float targetScale = 0f;
-        const float TARGET_GROWTH_RATE = 4.0f;
+
 
         int score = 0;
         double timer = 10;
@@ -72,6 +71,7 @@ namespace ShootingGallery
             
             targetSprite = Content.Load<Texture2D>("target");
             target = new Target(targetSprite, new Vector2(350,200), targetRadius);
+            target.Center = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
         }
 
         protected override void Update(GameTime gameTime)
@@ -96,19 +96,7 @@ namespace ShootingGallery
             }
 
             target.Update(gameTime);
-            //Add Target Scaling feature here
-            if (target.Scale < 1.0f)
-            {
-                //targetScale += TARGET_GROWTH_RATE * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                //if(targetScale > 1.0f) targetScale = 1.0f;
-
-                Vector2 center = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-
-                target.Position = Vector2.Lerp(center, targetDestination, target.Scale);
-
-
-            }
-
+            
             
 
             mState = Mouse.GetState();
@@ -142,9 +130,8 @@ namespace ShootingGallery
                 if (target.IsHit(crossHairPosition))
                 {
                     Random rand = new Random();
-                    target.Position = new Vector2((rand.Next(target.Radius, _graphics.PreferredBackBufferWidth - target.Radius)), rand.Next(target.Radius, _graphics.PreferredBackBufferHeight - target.Radius));
+                    target.Destination = new Vector2((rand.Next(target.Radius, _graphics.PreferredBackBufferWidth - target.Radius)), rand.Next(target.Radius, _graphics.PreferredBackBufferHeight - target.Radius));
                     score++;
-                    targetDestination = target.Position;
                     target.Scale = 0f;
                 }
                 mReleased = false;
@@ -159,7 +146,7 @@ namespace ShootingGallery
                     gameOver = false;
                     score = 0;
                     timer = 10;
-                    targetScale = 0f;
+                    
                     currentGameState = GameState.Game;
                 }
             }
